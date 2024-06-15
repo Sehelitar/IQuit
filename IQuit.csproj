@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+        <AssemblyName>IQuit</AssemblyName>
+        <Description>The Company can't fire you if you quit first!</Description>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <IsPublishable>False</IsPublishable>
+        <PlatformTarget>x64</PlatformTarget>
+        <ErrorReport>none</ErrorReport>
+        <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+        <Configurations>Debug;Release</Configurations>
+        <IsPackable>false</IsPackable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+        <RootNamespace>IQuit</RootNamespace>
+        <Company>Sehelitar</Company>
+        <Product>IQuit</Product>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+        <Copyright>Sehelitar @ https://sehelitar.tv</Copyright>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+        <PackageReference Include="LethalCompany.GameLibs.Steam" Version="50.0.1-ngd.0" />
+        <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="CHANGELOG.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="icon.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="LICENSE.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="manifest.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="README.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="netcode-patch --no-overwrite $(TargetPath) &quot;T:\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed&quot;&#xA;move $(TargetDir)$(TargetName)_patched$(TargetExt) $(TargetPath)&#xA;move $(TargetDir)$(TargetName)_patched.pdb $(TargetDir)$(TargetName).pdb&#xA;cd $(TargetDir)&#xA;tar -a -c -f $(TargetName)_$(Version).zip $(TargetFileName) CHANGELOG.md README.md LICENSE.md icon.png manifest.json " />
+    </Target>
+
+</Project>
