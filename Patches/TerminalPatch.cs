@@ -1,71 +1,54 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using HarmonyLib;
 using IQuit.Behaviors;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace IQuit.Patches;
 
 [HarmonyPatch(typeof(Terminal))]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 internal class TerminalPatch
 {
-    private static ResignationHandler? _resignationHandler = null;
+    private static ResignationHandler? _resignationHandler;
     
     [HarmonyPatch("Awake")]
     [HarmonyPrefix]
-    private static void TerminalAwake(ref Terminal __instance)
+    [HarmonyPriority(Priority.First)]
+    private static void Awake(ref Terminal __instance)
     {
         var result = ScriptableObject.CreateInstance<TerminalNode>();
         result.clearPreviousText = true;
-        result.terminalEvent = "iquit";
-        result.displayText = "";
+        result.terminalEvent = "iquit_goodbye";
+        result.displayText = Locale.SendingResignation + "\n\n";
         
         var noun = ScriptableObject.CreateInstance<TerminalKeyword>();
         noun.isVerb = false;
         noun.word = "iquit";
         noun.specialKeywordResult = result;
         
+        // That's how we inject our own command into the Terminal :o
         __instance.terminalNodes.allKeywords = __instance.terminalNodes.allKeywords.AddToArray(noun);
+        
+        // Attach our custom component to the Terminal (this is where the magic happens)
         _resignationHandler = __instance.gameObject.AddComponent<ResignationHandler>();
+
+        // Patch HELP node text
+        var helpNode = __instance.terminalNodes.specialNodes.Where(x => x.name == "HelpCommands").Select(x => x).FirstOrDefault();
+        if (helpNode == null) return;
+        
+        helpNode.displayText = helpNode.displayText[..^23] + $@">IQUIT
+{Locale.CommandDesc}
+
+[numberOfItemsOnRoute]
+";
     }
 
-    [HarmonyPatch("TextPostProcess")]
-    [HarmonyPrefix]
-    private static void TerminalTextPostProcess(ref Terminal __instance, ref string modifiedDisplayText, ref TerminalNode node)
+    [HarmonyPatch("RunTerminalEvents")]
+    [HarmonyPostfix]
+    private static void RunTerminalEvents(ref Terminal __instance, ref TerminalNode node)
     {
-        if (node == null)
-            return;
-
-        if(node.name.ToLower().Contains("help"))
-        {
-            modifiedDisplayText = modifiedDisplayText[..^1];
-            modifiedDisplayText += @">IQUIT
-You don't feel like your crew is up to the mission? It's too late to quit! ... or is it?
-
-
-";
-        }
-        else if (node.terminalEvent is "iquit")
-        {
-            if (!StartOfRound.Instance.inShipPhase)
-            {
-                modifiedDisplayText = @"
-
-// <size=20><color=#ff0000>Request denied</color></size> //
-Your resignation has been refused by the Company. Please leave the orbit of the moon before resigning.
-It is for your safety and that of the local flora and fauna. Thank you.
-
-";
-            }
-            else
-            {
-                modifiedDisplayText = @"
-
-// <size=20><color=#ff0000>Request denied</color></size> //
-Your resignation has been refused by the Company. Only the Chief Officer can resign for the entire crew.
-
-";
-                _resignationHandler?.HandleResignation();
-            }
-        }
+        if (node.terminalEvent == "iquit_goodbye")
+            _resignationHandler?.HandleResignation();
     }
 }

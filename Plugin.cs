@@ -12,7 +12,6 @@ namespace IQuit;
 [BepInProcess("Lethal Company.exe")]
 public class Plugin : BaseUnityPlugin
 {
-
     internal static ManualLogSource Log { get; private set; } = null!;
     internal static PluginConfigStruct GameConfig { get; private set; }
     private static Harmony _globalHarmony = null!;
@@ -33,6 +32,7 @@ public class Plugin : BaseUnityPlugin
         GameConfig = new PluginConfigStruct
         {
             AllowOthers = Config.Bind("General", "AllowOthers", false, "Allow non-host players to quit."),
+            FastReset = Config.Bind("General", "FastReset", true, "Instantly reset your game and bypass the eject sequence.")
         };
     }
     
@@ -65,4 +65,5 @@ public class Plugin : BaseUnityPlugin
 internal struct PluginConfigStruct
 {
     public ConfigEntry<bool> AllowOthers;
+    public ConfigEntry<bool> FastReset;
 }

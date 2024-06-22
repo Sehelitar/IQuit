@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <AssemblyName>IQuit</AssemblyName>
         <Description>The Company can't fire you if you quit first!</Description>
-        <Version>1.0.1</Version>
+        <Version>1.1.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <IsPublishable>False</IsPublishable>
@@ -19,8 +19,8 @@
         <RootNamespace>IQuit</RootNamespace>
         <Company>Sehelitar</Company>
         <Product>IQuit</Product>
-        <AssemblyVersion>1.0.1</AssemblyVersion>
-        <FileVersion>1.0.1</FileVersion>
+        <AssemblyVersion>1.1.0</AssemblyVersion>
+        <FileVersion>1.1.0</FileVersion>
         <Copyright>Sehelitar @ https://sehelitar.tv</Copyright>
     </PropertyGroup>
 
@@ -48,6 +48,21 @@
       <None Update="README.md">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Locale.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Locale.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Locale.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Locale.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
